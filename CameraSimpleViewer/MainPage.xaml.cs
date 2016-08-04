@@ -215,8 +215,18 @@ namespace CameraSimpleViewer
 
             if (_mediaCapture == null)
             {
+                DeviceInformation cameraDevice = null;
+
                 // Attempt to get the back camera if one is available, but use any camera device if not
-                var cameraDevice = await FindCameraDeviceByPanelAsync(Windows.Devices.Enumeration.Panel.Back);
+                try
+                {
+                    cameraDevice = await FindCameraDeviceByPanelAsync(Windows.Devices.Enumeration.Panel.Back);
+
+                }
+                catch (Exception)
+                {
+                    //Error while finding a camera;
+                }
 
                 if (cameraDevice == null)
                 {
@@ -474,8 +484,11 @@ namespace CameraSimpleViewer
             var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
 
             // Get the desired camera by panel
-            //DeviceInformation desiredDevice = allVideoDevices.FirstOrDefault(x => x.EnclosureLocation != null && x.EnclosureLocation.Panel == desiredPanel);
-            DeviceInformation desiredDevice = allVideoDevices[1];
+            DeviceInformation desiredDevice = allVideoDevices.FirstOrDefault(x => x.EnclosureLocation != null && x.EnclosureLocation.Panel == desiredPanel);
+
+            // I hardcoded this value to get a specific camera externally connected via USB, the line above was commented
+            // I would avoid that in most cases since it'll crash if you just have 1 camera
+            //DeviceInformation desiredDevice = allVideoDevices[1];
 
             // If there is no device mounted on the desired panel, return the first device found
             return desiredDevice ?? allVideoDevices.FirstOrDefault();
